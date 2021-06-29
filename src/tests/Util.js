@@ -1,6 +1,6 @@
 import supertest from 'supertest';
 
-import app from '../src/app.js';
+import app from '../app.js';
 
 export async function login () {
     const signUp = {
@@ -16,8 +16,8 @@ export async function login () {
     email: 'fulano@gmail.com',
     password: '1'
   };        
-  const user = await supertest(app).post("/signIn").send(body);
+  const user = await supertest(app).post("/Login").send(body);
+  const token=user.body;
   
-  const {token}=user.body;
-  return token;
+  return user.body.token;
 }

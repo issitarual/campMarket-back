@@ -7,7 +7,7 @@ const connection = new Pool({
   password: '123456',
   host: 'localhost',
   port: 5432,
-  database: process.env.NODE_ENV === "test" ? "campmarket" : "campmarket"
+  database: process.env.NODE_ENV === "test" ? "campmarket_test" : "campmarket"
 });
 
 export default connection;

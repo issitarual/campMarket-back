@@ -9,17 +9,6 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get("/teste", (req, res) => {
-    try{
-        console.log("hey");
-        res.sendStatus(200);
-    }
-    catch(e){
-        console.log(e);
-        res.sendStatus(400);
-    }
-});
-
 app.get("/products", async (req, res) => {
     try{
         const products = await connection.query(`

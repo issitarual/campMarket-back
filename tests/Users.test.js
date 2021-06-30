@@ -52,7 +52,7 @@ describe("POST /signUp", () => {
     });
 
 
-    it("returns 400 for Email address already registered", async () => {
+    it("returns 409 for Email address already registered", async () => {
         const body = {
             name: 'fulano',
             email: 'fulano@gmail.com',
@@ -97,8 +97,6 @@ describe("POST /Login", () => {
           };        
           const result = await supertest(app).post("/Login").send(body);
         
-
-
           
           expect(JSON.parse(result.text)).toEqual(
             expect.objectContaining({
@@ -108,7 +106,7 @@ describe("POST /Login", () => {
     );
 });
 
-it("returns 400 for invalid params", async () => {
+it("returns 401 for invalid user params", async () => {
     const signUp = {
         name: 'fulano',
         email: 'fulano@gmail.com',
@@ -144,7 +142,7 @@ describe("POST /LogOut", () => {
         await connection.query(`DELETE FROM sessions`);
       });
 
-    it("returns object containing user information and token for valid params", async () => {
+    it("returns 200 for valid token", async () => {
         const token = await login();
           const response = await supertest(app).delete("/logOut").set('Authorization', `Bearer ${token}`);
           expect(response.status).toEqual(200);  
@@ -152,7 +150,9 @@ describe("POST /LogOut", () => {
     
 });
 
-
-
+it("returns 401 for invalid token", async () => {
+    const response = await supertest(app).delete("/logOut").set('Authorization', `Bearer invalidToken`);
+    expect(response.status).toEqual(401);  
+});
 
 });

@@ -32,5 +32,6 @@ describe("GET /products/:productId", () => {
     it("returns 200 for valid params", async () => {
         const result = await supertest(app).get("/products/1");
         expect(result.status).toEqual(200);
+        expect(typeof result.body).toEqual("object");
     });
 }); 

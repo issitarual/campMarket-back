@@ -143,4 +143,8 @@ app.get("/products", async (req, res) => {
 });
 
 
+app.get("/search", async (req, res) => {
+    console.log(req.query.search);
+});
+
 export default app;

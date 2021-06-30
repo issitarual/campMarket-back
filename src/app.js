@@ -27,4 +27,30 @@ app.get("/products", async (req, res) => {
     }
 });
 
+app.get("/products/:productId", async (req, res) => {
+    const {productId} = req.params;
+    if(!parseInt(productId)){
+        res.sendStatus(404);
+        return;
+    }
+    try{
+        const product = await connection.query(`
+            SELECT *
+            FROM products
+            WHERE id = $1
+        `,[parseInt(productId) ]);
+
+        if(!product.rows[0]){
+            res.sendStatus(404);
+            return;
+        }
+        product.rows[0].price = (product.rows[0].price/100).toFixed(2).replace(".", ",");
+        res.send(product.rows[0]);
+    }
+    catch(e){
+        console.log(e);
+        res.sendStatus(400);
+    }
+});
+
 export default app;

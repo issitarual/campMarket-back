@@ -142,5 +142,21 @@ app.get("/products", async (req, res) => {
     }
 });
 
+app.get(`/search`, async (req,res)=>{
+    const { search } = req.query
+    try{
+        const result = await connection.query(`
+            SELECT * FROM products
+            where
+            name ILIKE $1
+        `, ["%"+search+"%"])
+        res.send(result.rows);
+    }catch(e){
+        console.log(e);
+        res.sendStatus(500);
+    }
+});
+
+
 
 export default app;

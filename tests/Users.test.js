@@ -1,7 +1,7 @@
 
-import app from '../app.js';
+import app from '../src/app.js';
 import supertest from 'supertest';
-import connection from '../database/database.js'
+import connection from '../src/database/database.js'
 
 import { login } from './Util.js';
 

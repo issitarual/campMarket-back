@@ -1,6 +1,6 @@
 import supertest from 'supertest';
 
-import app from '../app.js';
+import app from '../src/app.js';
 
 export async function login () {
     const signUp = {

@@ -90,10 +90,11 @@ app.post("/signUp", async(req,res)=>{
         console.log(e)
         res.sendStatus(500);
     }
-        
         });
 
-        app.delete("/logOut", async (req,res) => {
+
+    // Rota para LogOut
+    app.delete("/logOut", async (req,res) => {
             const authorization = req.headers['authorization'];
             const token = authorization?.replace('Bearer ', '');    
             if(!token) return res.sendStatus(400);
@@ -122,4 +123,24 @@ app.post("/signUp", async(req,res)=>{
             return res.sendStatus(500);
         }
             });
+
+app.get("/products", async (req, res) => {
+    try{
+        const products = await connection.query(`
+            SELECT products.*, categories.name AS "categoryName"
+            FROM products
+            JOIN categories
+            ON products.categoryid = categories.id
+        `);
+
+        products.rows.map(n => n.price = (n.price/100).toFixed(2).replace(".", ","))
+        res.send(products.rows);
+    }
+    catch(e){
+        console.log(e);
+        res.sendStatus(400);
+    }
+});
+
+
 export default app;

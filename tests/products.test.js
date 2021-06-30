@@ -8,8 +8,17 @@ afterAll(() => {
 
 describe("GET /products", () => {
     //tudo certo
-   it("returns text for valid params", async () => {
+   it("returns 200 & object for valid params", async () => {
        const result = await supertest(app).get("/products");
+       expect(result.status).toEqual(200);
+       expect(typeof result.body).toEqual("object");
+   });
+}); 
+
+describe("GET /search", () => {
+    //tudo certo
+   it("returns 200 & object for valid params", async () => {
+       const result = await supertest(app).get(`/search?search=limão`);
        expect(result.status).toEqual(200);
        expect(typeof result.body).toEqual("object");
    });

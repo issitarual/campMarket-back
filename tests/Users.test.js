@@ -5,16 +5,20 @@ import connection from '../src/database/database.js'
 
 import { login } from './Util.js';
 
-afterAll(async() => {
+
+
+
+afterAll(() => {
     connection.end();
-});
+
+  });
 
 describe("POST /signUp", () => {
+  beforeEach(async () => {
+    await connection.query(`DELETE FROM users`);
 
-    beforeEach(async () => {
-        await connection.query(`DELETE FROM users`);
-      });
-    
+  });
+
     it("returns 201 for valid params", async () => {
         const body = {
             name: 'fulano',
@@ -77,9 +81,10 @@ describe("POST /signUp", () => {
 });
 
 describe("POST /Login", () => {
-    beforeEach(async () => {
-        await connection.query(`DELETE FROM users`);
-      });
+  beforeEach(async () => {
+    await connection.query(`DELETE FROM users`);
+    await connection.query(`DELETE FROM sessions`);
+  });
 
     it("returns object containing user information and token for valid params", async () => {
         const signUp = {
@@ -137,11 +142,11 @@ it("returns 400 for empty params", async () => {
 
 
 describe("POST /LogOut", () => {
-    beforeEach(async () => {
-        await connection.query(`DELETE FROM users`);
-        await connection.query(`DELETE FROM sessions`);
-      });
 
+beforeEach(async () => {
+  await connection.query(`DELETE FROM users`);
+  await connection.query(`DELETE FROM sessions`);
+});
     it("returns 200 for valid token", async () => {
         const token = await login();
           const response = await supertest(app).delete("/logOut").set('Authorization', `Bearer ${token}`);
@@ -160,21 +165,44 @@ it("returns 401 for invalid token", async () => {
 
 describe("PUT /Account", () => {
   beforeEach(async () => {
-      await connection.query(`DELETE FROM users`);
-      await connection.query(`DELETE FROM sessions`);
-    });
+    await connection.query(`DELETE FROM users`);
+    await connection.query(`DELETE FROM sessions`);
+  });
 
   it("returns 200 for valid token", async () => {
-      const token = await login();
-      const body={
-        name:"fulano da silva",
-        email:"fulano@gmail.com"
-      }
-        const response = await (await supertest(app).put("/Account").send(body).set('Authorization', `Bearer ${token}`));
-        expect(response.status).toEqual(200);  
-
-  
+    const token = await login();
+    const body ={
+      name:"Fulano da silva",
+      email:"fulanoSilva@gmail.com"
+    }
+      const response = await supertest(app).put("/Account").send(body).set('Authorization', `Bearer ${token}`);
+      expect(response.status).toEqual(200);  
 });
 
+  it("returns 400 for invalid token", async () => {
 
+    const response = await supertest(app).put("/Account").set('Authorization', `Bearer invalidToken`);
+    const status = response.status;
+        expect(status).toEqual(400);  
 });
+
+it("returns 400 for invalid params", async () => {
+
+  const token = await login();
+  const body ={
+    name:"fulano da silva ",
+    email:"fulanoSilva.@gmail.com"
+  }
+    const response = await supertest(app).put("/Account").send(body).set('Authorization', `Bearer ${token}`);
+    expect(response.status).toEqual(400);   
+});
+
+it("returns 400 for empty params", async () => {
+
+  const token = await login();
+  const body ={}
+    const response = await supertest(app).put("/Account").send(body).set('Authorization', `Bearer ${token}`);
+    expect(response.status).toEqual(400);   
+});
+});
+

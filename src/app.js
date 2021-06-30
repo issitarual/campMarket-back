@@ -157,7 +157,7 @@ app.get(`/search`, async (req,res)=>{
     }
 });
 
-app.get("/products/:productId", async (req, res) => {
+app.get("/product/:productId", async (req, res) => {
     const {productId} = req.params;
     if(!parseInt(productId)){
         res.sendStatus(404);
@@ -176,6 +176,34 @@ app.get("/products/:productId", async (req, res) => {
         }
         product.rows[0].price = (product.rows[0].price/100).toFixed(2).replace(".", ",");
         res.send(product.rows[0]);
+    }
+    catch(e){
+        console.log(e);
+        res.sendStatus(400);
+    }
+});
+
+app.get("/category/:categoryName", async (req, res) => {
+    const { categoryName } = req.params;
+    if(!categoryName){
+        res.sendStatus(404);
+        return;
+    }
+    try{
+        const products = await connection.query(`
+            SELECT products.*
+            FROM products
+            JOIN categories
+            ON categories.id = products.categoryid
+            WHERE categories.name = $1
+        `,[categoryName]);
+
+        if(products.rows.length < 1){
+            res.sendStatus(404);
+            return;
+        }
+        products.rows.map(n => (n.price/100).toFixed(2).replace(".", ","));
+        res.send(products.rows);
     }
     catch(e){
         console.log(e);

@@ -156,3 +156,25 @@ it("returns 401 for invalid token", async () => {
 });
 
 });
+
+
+describe("PUT /Account", () => {
+  beforeEach(async () => {
+      await connection.query(`DELETE FROM users`);
+      await connection.query(`DELETE FROM sessions`);
+    });
+
+  it("returns 200 for valid token", async () => {
+      const token = await login();
+      const body={
+        name:"fulano da silva",
+        email:"fulano@gmail.com"
+      }
+        const response = await (await supertest(app).put("/Account").send(body).set('Authorization', `Bearer ${token}`));
+        expect(response.status).toEqual(200);  
+
+  
+});
+
+
+});

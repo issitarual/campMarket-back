@@ -14,7 +14,14 @@ const LoginSchema = joi.object({
 
 });
 
+const AccountSchema = joi.object({
+    name: joi.string().min(2).required(),
+    email: joi.string().email().required(),
+});
+
+
 export {
     SignUpSchema,
-    LoginSchema
+    LoginSchema,
+    AccountSchema
 }

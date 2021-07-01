@@ -1,11 +1,10 @@
 import express from 'express';
-import Joi from 'joi';
 import bcrypt from 'bcrypt';
 import connection from './database/database.js';
 import cors from 'cors';
 import { v4 as uuid } from 'uuid';
 
-import{ SignUpSchema, LoginSchema} from "../Schemas/UserSchema.js";
+import{ SignUpSchema, LoginSchema, AccountSchema, PasswordSchema} from "../Schemas/UserSchema.js";
 
 const app = express();
 app.use(express.json());
@@ -91,6 +90,92 @@ app.post("/signUp", async(req,res)=>{
         res.sendStatus(500);
     }
         });
+
+    //Rota para Editar conta
+
+
+    app.put("/Account", async(req,res)=>{
+        const { name,email } = req.body;
+        const authorization = req.headers['authorization'];
+        const token = authorization?.replace('Bearer ', '');   
+        if(!token) return res.sendStatus(400);
+    
+    const errors = AccountSchema.validate(req.body).error;
+    
+     if(errors) {
+    console.log(errors)
+    return res.sendStatus(400);
+    }
+        try{
+            const result = await connection.query(`
+            SELECT * FROM sessions
+            JOIN users
+            ON sessions."userId" = users.id
+            WHERE sessions.token = $1
+          `, [token]);
+        
+          const user = result.rows[0];
+
+          if(user) {
+            const UpdateAccount = await connection.query(`
+            UPDATE users SET name=$1, email=$2 WHERE id=$3
+          `, [name,email,user.userId]);
+          return res.send({
+            email: email,
+            name:name,
+            id:user.userId,
+            token: user.token
+          });
+        
+          } else {
+            res.sendStatus(401);
+          }
+        }catch(e){
+            console.log(e);
+            return res.sendStatus(500);
+        }
+    
+    
+        });
+    
+
+    //Rota para mudar a senha
+
+    app.put("/change_password", async(req,res)=>{
+        const { email,password,confirmPassword } = req.body;
+    
+    const errors = PasswordSchema.validate(req.body).error;
+    
+     if(errors) {
+    console.log(errors)
+    return res.sendStatus(400);
+    }
+        try{
+            const result = await connection.query(`
+            SELECT * FROM users
+            WHERE users.email = $1
+          `, [email]);
+        
+          const user = result.rows[0];
+
+          if(user) {
+            const encryptedPassword = bcrypt.hashSync(password, 10);
+            const newPassword = await connection.query(`
+            UPDATE users SET password=$1 WHERE email=$2
+          `, [encryptedPassword,user.email]);
+          return res.sendStatus(200);
+        
+          } else {
+            res.sendStatus(404);
+          }
+        }catch(e){
+            console.log(e);
+            return res.sendStatus(500);
+        }
+    
+    
+        });
+
 
 
     // Rota para LogOut

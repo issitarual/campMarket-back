@@ -206,3 +206,53 @@ it("returns 400 for empty params", async () => {
 });
 });
 
+describe("PUT /change_password", () => {
+  beforeEach(async () => {
+    await connection.query(`DELETE FROM users`);
+    await connection.query(`DELETE FROM sessions`);
+  });
+
+  it("returns 200 for valid params", async () => {
+    const token = await login();
+    const body ={
+      email:"fulano@gmail.com",
+      password:"123",
+      confirmPassword:"123"
+    }
+      const response = await supertest(app).put("/change_password").send(body);
+      expect(response.status).toEqual(200);  
+});
+
+  it("returns 400 for empty params", async () => {
+
+    const response = await supertest(app).put("/change_password");
+    const status = response.status;
+        expect(status).toEqual(400);  
+});
+
+it("returns 400 for invalid params", async () => {
+
+  const token = await login();
+  const body ={
+    email:"fulano@gmail.com",
+    password:"123",
+    confirmPassword:"1234"
+  }
+    const response = await supertest(app).put("/change_password").send(body);
+    expect(response.status).toEqual(400);   
+});
+
+it("returns 404 for not registered email", async () => {
+
+  const token = await login();
+  const body ={
+    email:"fulanoSilva@gmail.com",
+    password:"123",
+    confirmPassword:"123"
+  }
+    const response = await supertest(app).put("/change_password").send(body);
+    expect(response.status).toEqual(404);   
+});
+});
+
+

@@ -299,12 +299,12 @@ app.get("/category/:categoryName", async (req, res) => {
 });
 
 app.post('/finish', async (req,res)=>{
-    const { cart } = req.body;
-    console.log(cart)
+    const {cart}  = req.body;
+
     if(!cart) return res.sendStatus(401);
     const authorization = req.headers['authorization'];
     const token = authorization?.replace('Bearer ', '');    
-    if(!token) return res.sendStatus(401);
+    if(!token) return res.sendStatus(400);
     try{
         const checkUserId = await connection.query(`
             SELECT * from sessions
@@ -318,7 +318,7 @@ app.post('/finish', async (req,res)=>{
             ("userId", "productId")
             VALUES ($1, $2)
         `,[userId, cart]);
-        res.send(201);
+        res.sendStatus(201);
        
         const result= await connection.query(`
         SELECT * FROM users

@@ -358,11 +358,7 @@ app.post('/finish', async (req,res)=>{
               console.log('Sending test email');
               await sendEmail();
             })();
-
-        
-
         }
-
         else{
             return sendStatus(401)
         }

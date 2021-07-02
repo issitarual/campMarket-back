@@ -287,12 +287,37 @@ app.get("/category/:categoryName", async (req, res) => {
             res.sendStatus(404);
             return;
         }
-        products.rows.map(n => (n.price/100).toFixed(2).replace(".", ","));
+        products.rows.map(n=>(n.price = (n.price/100).toFixed(2).replace(".", ",")));
         res.send(products.rows);
     }
     catch(e){
         console.log(e);
         res.sendStatus(400);
+    }
+});
+
+app.post('/finish', async (req,res)=>{
+    const { cart } = req.body;
+    console.log(cart)
+    if(!cart) return res.sendStatus(401);
+    const authorization = req.headers['authorization'];
+    const token = authorization?.replace('Bearer ', '');    
+    if(!token) return res.sendStatus(401);
+    try{
+        const checkUserId = await connection.query(`
+            SELECT * from sessions
+            where token = $1
+        `, [token])
+        const userId = (checkUserId.rows[0].userId);
+        await connection.query(`
+            INSERT INTO purchase
+            ("userId", "productId")
+            VALUES ($1, $2)
+        `,[userId, cart]);
+        res.send(201);
+    }catch(e){
+        console.log(e);
+        res.sendStatus(500)
     }
 });
 

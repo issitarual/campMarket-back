@@ -12,6 +12,35 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+
+function getMessage(user) {
+    const body = ` Olá, ${user.name}! Tudo bem?
+    Seu pedido foi criado com sucesso, e os produtos já estão em separação.
+    A equipe CampMarket agradece a preferência!
+    `
+    ;
+    return {
+      to: `${user.email}`,
+      from: 'campmarket.bootcamp@gmail.com',
+      subject: 'Seu pedido foi criado!',
+      text: body,
+      html: `${body}`
+    };
+  }
+
+  async function sendEmail(user) {
+    try {
+      await sendGridMail.send(getMessage(user));
+
+    } catch (error) {
+      console.error('Error sending test email');
+      console.error(error);
+      if (error.response) {
+        console.error(error.response.body)
+      }
+    }
+  }
+
 // Rota para sign up
 
 app.post("/signUp", async(req,res)=>{
@@ -318,7 +347,7 @@ app.post('/finish', async (req,res)=>{
             ("userId", "productId")
             VALUES ($1, $2)
         `,[userId, cart]);
-        res.sendStatus(201);
+       
        
         const result= await connection.query(`
         SELECT * FROM users
@@ -326,42 +355,17 @@ app.post('/finish', async (req,res)=>{
       `, [userId]);
     
       const user = result.rows[0];
+         
+      await sendEmail(user);
+           
 
-        function getMessage() {
-            const body = ` Olá, ${user.name}! Tudo bem?
-            Seu pedido foi criado com sucesso, e os produtos já estão em separação.
-            A equipe CampMarket agradece a preferência!
-            `
-            ;
-            return {
-              to: `${user.email}`,
-              from: 'campmarket.bootcamp@gmail.com',
-              subject: 'Seu pedido foi criado!',
-              text: body,
-              html: `${body}`
-            };
-          }
-          async function sendEmail() {
-              try {
-                await sendGridMail.send(getMessage());
-          
-              } catch (error) {
-                console.error('Error sending test email');
-                console.error(error);
-                if (error.response) {
-                  console.error(error.response.body)
-                }
-              }
-            }
-          
-            (async () => {
-              await sendEmail();
-            })();
+    return res.sendStatus(201);
+
         }
         else{
             return sendStatus(401)
         }
-
+       
     }catch(e){
         console.log(e);
         res.sendStatus(500)

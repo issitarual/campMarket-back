@@ -117,7 +117,7 @@ describe("POST /finish", ()=>{
                          "categoryName": "vegetables"}, "qtd": 1 } ]
             }
         const result = await supertest(app).post("/finish").send(body).set('Authorization', `Bearer ${token}`);
-        console.log(result);
+
         expect(result.status).toEqual(201);  
     });
 

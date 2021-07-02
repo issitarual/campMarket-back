@@ -344,7 +344,7 @@ app.post('/finish', async (req,res)=>{
           async function sendEmail() {
               try {
                 await sendGridMail.send(getMessage());
-                console.log('Test email sent successfully');
+          
               } catch (error) {
                 console.error('Error sending test email');
                 console.error(error);
@@ -355,7 +355,6 @@ app.post('/finish', async (req,res)=>{
             }
           
             (async () => {
-              console.log('Sending test email');
               await sendEmail();
             })();
         }

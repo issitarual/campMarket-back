@@ -3,6 +3,8 @@ import bcrypt from 'bcrypt';
 import connection from './database/database.js';
 import cors from 'cors';
 import { v4 as uuid } from 'uuid';
+import sendGridMail from '@sendgrid/mail'
+sendGridMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 import{ SignUpSchema, LoginSchema, AccountSchema, PasswordSchema} from "../Schemas/UserSchema.js";
 
@@ -309,12 +311,62 @@ app.post('/finish', async (req,res)=>{
             where token = $1
         `, [token])
         const userId = (checkUserId.rows[0].userId);
-        await connection.query(`
+
+        if(userId){
+            await connection.query(`
             INSERT INTO purchase
             ("userId", "productId")
             VALUES ($1, $2)
         `,[userId, cart]);
         res.send(201);
+       
+        const result= await connection.query(`
+        SELECT * FROM users
+        WHERE users.id = $1
+      `, [userId]);
+    
+      const user = result.rows[0];
+
+        function getMessage() {
+            const body = ` Olá, ${user.name}! Tudo bem?
+            Seu pedido foi criado com sucesso, e os produtos já estão em separação.
+            A equipe CampMarket agradece a preferência!
+            `
+            ;
+            return {
+              to: `${user.email}`,
+              from: 'campmarket.bootcamp@gmail.com',
+              subject: 'Seu pedido foi criado!',
+              text: body,
+              html: `${body}`
+            };
+          }
+          async function sendEmail() {
+              try {
+                await sendGridMail.send(getMessage());
+                console.log('Test email sent successfully');
+              } catch (error) {
+                console.error('Error sending test email');
+                console.error(error);
+                if (error.response) {
+                  console.error(error.response.body)
+                }
+              }
+            }
+          
+            (async () => {
+              console.log('Sending test email');
+              await sendEmail();
+            })();
+
+        
+
+        }
+
+        else{
+            return sendStatus(401)
+        }
+
     }catch(e){
         console.log(e);
         res.sendStatus(500)

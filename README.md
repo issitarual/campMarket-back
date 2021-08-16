@@ -15,6 +15,7 @@ This is an API wich anyone with list the projects, register an user and have an 
 - [x] Filter product by its category
 - [x] Each product information
 ### Future improvements 🔮
+- [ ] Layered architecture
 - [ ] Implement TypeScript and TypeORM
 - [ ] Implement Migrations
 ## Technologies
